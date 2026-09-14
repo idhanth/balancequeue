@@ -1,0 +1,333 @@
+"""Render docs/benchmarks.md from benchmarks/results/*.json.
+
+    uv run python benchmarks/report.py            # rewrite docs/benchmarks.md
+    uv run python benchmarks/report.py --check    # exit 1 if it is out of date
+
+Every figure in the document is taken from the JSON results, so the prose cannot drift
+from what was measured. tests/test_docs.py also fails if README.md or docs/PRD.md stop
+quoting the current headline figures.
+"""
+
+import argparse
+import json
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+RESULTS = ROOT / "benchmarks" / "results"
+DOC = ROOT / "docs" / "benchmarks.md"
+
+
+def load() -> dict:
+    return {name: json.loads((RESULTS / f"{name}.json").read_text()) for name in ("simulation", "concurrency", "history")}
+
+
+def pct(value: float) -> str:
+    return f"{value * 100:.1f}%"
+
+
+def ms(value: float) -> str:
+    return f"{value:.2f} ms"
+
+
+def num(value: int) -> str:
+    return f"{value:,}"
+
+
+def p95_reduction(history: dict) -> float:
+    """Computed from the two p95 values, never from a pre-rounded field."""
+    before, after = history["without_index"]["p95_ms"], history["with_index"]["p95_ms"]
+    return (before - after) / before
+
+
+def headline_figures(results: dict) -> list[str]:
+    """Figures README.md and docs/PRD.md must quote, formatted exactly as they appear."""
+    sim, con, his = results["simulation"], results["concurrency"], results["history"]
+    shipped, control = con["modes"]["skip_locked"]["summary"], con["modes"]["none"]["summary"]
+    return [
+        pct(sim["mean_reduction"]),
+        num(sim["games"]),
+        f"{sim['random_assignment']['mean']:.1f} → {sim['optimized_assignment']['mean']:.1f}",
+        f"{sim['balance_call_p99_us']:.1f} µs",
+        num(shipped["requests"]),
+        f"{control['trials_with_duplicates']} of {control['trials']} trials",
+        ms(his["without_index"]["p95_ms"]),
+        ms(his["with_index"]["p95_ms"]),
+        pct(p95_reduction(his)),
+    ]
+
+
+def _provenance_row(label: str, result: dict) -> str:
+    env = result.get("environment", {})
+    commit = env.get("git_commit")
+    dirty = env.get("git_dirty")
+    clean = {False: "yes", True: "**no**"}.get(dirty, "not recorded")
+    machine = f"{env.get('machine', '?')} ({env.get('cpu_count', '?')} cores), {env.get('os', '?')}"
+    software = f"Python {env.get('python', result.get('python', '?'))}"
+    if "postgres" in env:
+        software += f", PostgreSQL {env['postgres']}"
+    commit_cell = f"`{commit[:12]}`" if commit else "not recorded"
+    return f"| {label} | {commit_cell} | {clean} | {env.get('recorded_at', '?')} | {machine} | {software} |"
+
+
+def _plan_summary(plan: str) -> str:
+    if "Index Scan using idx_player_history" in plan:
+        access = "an index scan on `idx_player_history` returns the newest rows already in order"
+    elif "Parallel Seq Scan on match_players" in plan:
+        removed = re.search(r"Rows Removed by Filter: (\d+)", plan)
+        access = "a parallel sequential scan reads all of `match_players`"
+        if removed:
+            access += f", discarding {num(int(removed.group(1)))} rows per process"
+    elif "Seq Scan on match_players" in plan:
+        access = "a sequential scan reads all of `match_players`"
+    else:
+        access = "see the plan below"
+    execution = re.search(r"Execution Time: ([\d.]+) ms", plan)
+    return access + (f"; execution time {execution.group(1)} ms" if execution else "")
+
+
+def render(results: dict) -> str:
+    sim, con, his = results["simulation"], results["concurrency"], results["history"]
+    rnd, opt = sim["random_assignment"], sim["optimized_assignment"]
+    modes = con["modes"]
+    shipped, blocking, control = (modes[m]["summary"] for m in ("skip_locked", "for_update", "none"))
+    setup = con["setup"]
+    pg = con.get("environment", {}).get("postgres_settings", {})
+    before, after, data = his["without_index"], his["with_index"], his["dataset"]
+    reduction = pct(sim["mean_reduction"])
+
+    def created(summary: dict) -> str:
+        return f"{num(summary['outcomes'].get('created', 0))} / {num(summary['requests'])}"
+
+    def status_mismatches(mode: str) -> int:
+        return sum(t["status_mismatches"] for t in modes[mode]["trials"])
+
+    same_ten = all(t["distinct_players_assigned"] == 10 for t in modes["none"]["trials"])
+    control_detail = (
+        f" In every trial, all {setup['concurrent_requests']} requests read the same 10 players and "
+        f"built {setup['concurrent_requests']} matches from them."
+        if same_ten
+        else ""
+    )
+    target_note = (
+        "Without the index the endpoint misses the PRD target at this dataset size; with it, the target is met."
+        if before["p95_ms"] > 50 >= after["p95_ms"]
+        else f"PRD target: p95 under 50 ms (without index: {ms(before['p95_ms'])}; with index: {ms(after['p95_ms'])})."
+    )
+
+    lines = [
+        "# Benchmarks",
+        "",
+        "<!-- Generated by benchmarks/report.py from benchmarks/results/*.json. Do not edit by hand. -->",
+        "",
+        "Every figure on this page is rendered from the raw results in `benchmarks/results/*.json`",
+        "by `benchmarks/report.py`. `tests/test_docs.py` fails if this page is out of date, or if",
+        "`README.md` or `docs/PRD.md` quote headline figures that differ from the results. To",
+        "update the numbers, re-run the commands below on a clean checkout, then run",
+        "`uv run python benchmarks/report.py`.",
+        "",
+        "The original PRD draft contained projected figures written before any code existed.",
+        "They were not reproduced and have been removed. Only measured values appear in this",
+        "repository.",
+        "",
+        "## Provenance",
+        "",
+        "| Benchmark | Commit measured | Clean tree | Recorded (UTC) | Machine | Software |",
+        "|---|---|---|---|---|---|",
+        _provenance_row("Team balance", sim),
+        _provenance_row("Concurrency", con),
+        _provenance_row("Player history", his),
+        "",
+        "\"Clean tree\" means the working tree matched the commit, apart from the results files",
+        "the scripts write. The client, API and database ran on the same machine. PostgreSQL",
+        f"used default memory settings (`shared_buffers` {pg.get('shared_buffers', '?')}, `work_mem` "
+        f"{pg.get('work_mem', '?')}, {pg.get('max_parallel_workers_per_gather', '?')} parallel workers per gather)",
+        f"with `max_connections` {pg.get('max_connections', '?')}.",
+        "",
+        "---",
+        "",
+        "## 1. Team balance vs. random assignment (PRD §8)",
+        "",
+        "```",
+        sim["command"],
+        "```",
+        "",
+        "| Assignment | Mean | Median | p95 | Max |",
+        "|------------|-----:|-------:|----:|----:|",
+        f"| Random     | {rnd['mean']:.1f} | {rnd['median']:.1f} | {rnd['p95']} | {rnd['max']} |",
+        f"| Optimized  | {opt['mean']:.1f} | {opt['median']:.1f} | {opt['p95']} | {opt['max']} |",
+        "",
+        f"- **Mean disparity reduction: {reduction}** (median: {pct(sim['median_reduction'])}). "
+        "The PRD target is at least 50%.",
+        f"- `balance()` time per lobby: p50 {sim['balance_call_p50_us']:.1f} µs, "
+        f"p99 {sim['balance_call_p99_us']:.1f} µs. The PRD target is under 100 ms.",
+        f"- The optimized maximum ({opt['max']}) comes from lobbies with extreme rating outliers,",
+        "  where no 5v5 split can be close.",
+        "",
+        f"### Conditions behind the {reduction} figure",
+        "",
+        "The percentage is only meaningful with these conditions attached:",
+        "",
+        "| Condition | Value |",
+        "|---|---|",
+        f"| Games | {num(sim['games'])}, fixed seed {sim['seed']} (re-running reproduces identical disparities) |",
+        "| Lobby | 10 players drawn independently for each game, not sampled from a live queue |",
+        f"| Ratings | {sim['elo_distribution']} |",
+        "| Baseline | One uniformly random 5v5 split per game (random team assignment) |",
+        "| Optimized | `balance()`, the production function: all 126 partitions, minimum \\|A − B\\| |",
+        "| Metric | (mean random disparity − mean optimized disparity) / mean random disparity |",
+        "",
+        "**Why the reduction is so large.** A random split is one draw from the 126 possible",
+        "matchups, while the balancer takes the best of all 126. With ten independently drawn",
+        f"ratings, the best matchup is usually within a few Elo points (median {opt['median']:.1f}). So",
+        "almost all of a random split's disparity can be removed.",
+        "",
+        "**Not measured:** other rating distributions, lobbies pre-filtered by skill (as a real",
+        "queue might produce), and stronger baselines such as a snake draft. Each would change",
+        f"the percentage. Cite {reduction} only with the conditions above.",
+        "",
+        "`tests/test_simulation.py` repeats the 50,000-game run and asserts that the reduction",
+        "is at least 50%, the PRD target.",
+        "",
+        "Worked example: for the PRD's sample lobby (1540, 1520, 1510, 1490, 1475, 1460, 1420,",
+        "1410, 1395, 1380), the balancer returns 7300 vs. 7300, a difference of 0. The brute-force",
+        "oracle in `tests/test_balance.py` confirms that 0 is the true minimum.",
+        "",
+        "---",
+        "",
+        "## 2. Concurrent matchmaking (PRD §9-10)",
+        "",
+        "```",
+        con["command"],
+        "```",
+        "",
+        f"Each trial queues {num(setup['queued_players_per_trial'])} players, which is enough for every request.",
+        f"It then starts {setup['concurrent_requests']} matchmaking transactions at the same instant:",
+        f"{setup['concurrent_requests']} threads wait on a barrier, and each already holds its own database",
+        "connection. Afterwards `balancequeue.invariants` audits the database. The run covers",
+        f"three locking strategies, {shipped['trials']} trials each, for {num(shipped['requests'])} transactions",
+        "per strategy.",
+        "",
+        "| Strategy | Matches created | Players double-assigned | Excess assignments | Median trial wall time | Median request p95 |",
+        "|---|--:|--:|--:|--:|--:|",
+        f"| `FOR UPDATE SKIP LOCKED` (shipped) | {created(shipped)} | **{shipped['duplicate_players_total']}** | "
+        f"{num(shipped['excess_assignments_total'])} | {shipped['median_wall_ms']:.0f} ms | {shipped['median_request_p95_ms']:.0f} ms |",
+        f"| `FOR UPDATE` | {created(blocking)} | {blocking['duplicate_players_total']} | "
+        f"{num(blocking['excess_assignments_total'])} | {blocking['median_wall_ms']:.0f} ms | {blocking['median_request_p95_ms']:.0f} ms |",
+        f"| no lock (control) | {created(control)} | {control['duplicate_players_total']} "
+        f"(in {control['trials_with_duplicates']} of {control['trials']} trials) | "
+        f"{num(control['excess_assignments_total'])} | {control['median_wall_ms']:.0f} ms | {control['median_request_p95_ms']:.0f} ms |",
+        "",
+        f"- **The shipped strategy: {shipped['duplicate_players_total']} duplicate assignments across "
+        f"{num(shipped['requests'])} simultaneous transactions.**",
+        f"  Malformed matches (not exactly 5v5): {shipped['malformed_matches_total']}. Players whose status",
+        f"  disagreed with the rosters: {status_mismatches('skip_locked')}.",
+        "- **Why the no-lock control is kept:** it proves the test really creates races. Without",
+        f"  row locks, {control['duplicate_players_total']} players were double-assigned, with "
+        f"{num(control['excess_assignments_total'])} excess assignments,",
+        f"  in {control['trials_with_duplicates']} of {control['trials']} trials.{control_detail}",
+        f"- Plain `FOR UPDATE` was also correct in this setup ({blocking['duplicate_players_total']} duplicates),",
+        "  where players are plentiful. Median batch wall time was",
+        f"  {blocking['median_wall_ms']:.0f} ms, vs. {shipped['median_wall_ms']:.0f} ms for `SKIP LOCKED`.",
+        "",
+        "`tests/test_concurrency.py` repeats these checks on every CI run:",
+        "",
+        "- 100 simultaneous service-level transactions.",
+        "- 100 concurrent HTTP `POST /matches` calls against a live uvicorn server.",
+        "- A scarcity case with 250 players for 100 requests.",
+        "",
+        "Caveat from the scarcity case: under `SKIP LOCKED`, a request can get",
+        "`INSUFFICIENT_PLAYERS` while other in-flight transactions briefly hold the remaining",
+        "rows. The test therefore asserts that no player is lost or duplicated, not an exact",
+        "number of matches.",
+        "",
+        "---",
+        "",
+        "## 3. Player-history latency before and after indexing (PRD §13-14)",
+        "",
+        "```",
+        his["command"],
+        "```",
+        "",
+        "**Dataset** (seeded deterministically in SQL):",
+        "",
+        f"- {num(data['players'])} players and {num(data['matches'])} completed matches.",
+        f"- **{num(data['match_players_rows'])} `match_players` rows**, "
+        f"{data['matches_per_player']:.0f} matches per player on average.",
+        f"- `match_players` takes up {data['match_players_total_size']} including its indexes.",
+        "",
+        f"**Method:** {his['method']}.",
+        f"{before['requests']} measured requests follow {before['warmup_requests']} warm-up requests.",
+        "The first phase uses migration 001 only. The second applies",
+        "`002_player_history_index.sql` (`(player_id, created_at DESC, match_id DESC)`), runs",
+        "`VACUUM ANALYZE` and restarts the server.",
+        "",
+        "| Schema | p50 | p95 | p99 | Mean | Max |",
+        "|---|--:|--:|--:|--:|--:|",
+        f"| Without history index | {ms(before['p50_ms'])} | {ms(before['p95_ms'])} | {ms(before['p99_ms'])} | "
+        f"{ms(before['mean_ms'])} | {ms(before['max_ms'])} |",
+        f"| With history index | {ms(after['p50_ms'])} | {ms(after['p95_ms'])} | {ms(after['p99_ms'])} | "
+        f"{ms(after['mean_ms'])} | {ms(after['max_ms'])} |",
+        "",
+        f"- **p95: {ms(before['p95_ms'])} → {ms(after['p95_ms'])}, a {pct(p95_reduction(his))} reduction.** {target_note}",
+        "- `EXPLAIN (ANALYZE, BUFFERS)` of the endpoint's exact query:",
+        f"  - Without the index, {_plan_summary(before['explain_analyze'])}.",
+        f"  - With the index, {_plan_summary(after['explain_analyze'])}.",
+        "- The no-index latency depends on table size, and this page does not measure how it",
+        "  scales. Pass `--matches` to try other sizes.",
+        "",
+        "<details><summary>Query plan without the index</summary>",
+        "",
+        "```",
+        before["explain_analyze"],
+        "```",
+        "",
+        "</details>",
+        "",
+        "<details><summary>Query plan with the index</summary>",
+        "",
+        "```",
+        after["explain_analyze"],
+        "```",
+        "",
+        "</details>",
+        "",
+        "---",
+        "",
+        "## Statements these results support",
+        "",
+        f"- Reduced mean team Elo disparity **{reduction}** vs. random assignment across **{num(sim['games'])}**",
+        f"  simulated games ({sim['elo_distribution'].split(',')[0]}), by exhaustively evaluating all **126** unique",
+        f"  5v5 partitions (p99 balancing time {sim['balance_call_p99_us']:.1f} µs).",
+        f"- **{shipped['duplicate_players_total']} duplicate player assignments** across "
+        f"**{num(shipped['requests'])}** matchmaking transactions",
+        f"  ({shipped['trials']} trials × {setup['concurrent_requests']} simultaneous) using PostgreSQL "
+        "`FOR UPDATE SKIP LOCKED`. The",
+        f"  same test without row locks double-assigned players in {control['trials_with_duplicates']} of "
+        f"{control['trials']} trials.",
+        f"- Cut player-history p95 latency from **{ms(before['p95_ms'])} to {ms(after['p95_ms'])} "
+        f"(−{pct(p95_reduction(his))})** on",
+        f"  **{num(data['match_players_rows'])}** `match_players` rows with a composite",
+        "  `(player_id, created_at DESC, match_id DESC)` index, verified with `EXPLAIN ANALYZE`.",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--check", action="store_true", help="exit 1 if docs/benchmarks.md is stale")
+    args = parser.parse_args()
+    rendered = render(load())
+    if args.check:
+        if DOC.read_text() != rendered:
+            sys.exit("docs/benchmarks.md is out of date: run `uv run python benchmarks/report.py`")
+        print("docs/benchmarks.md is up to date")
+        return
+    DOC.write_text(rendered)
+    print(f"wrote {DOC.relative_to(ROOT)}")
+
+
+if __name__ == "__main__":
+    main()

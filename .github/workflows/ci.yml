@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Tests (PostgreSQL 16)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TEST_DATABASE_URL: postgresql+psycopg://postgres:postgres@127.0.0.1:5432/balancequeue_test
+    steps:
+      - uses: actions/checkout@v4
+
+      # Started with docker run rather than a service container: the concurrency tests
+      # hold ~150 connections at once, and service containers cannot set max_connections.
+      - name: Start PostgreSQL 16
+        run: |
+          docker run -d --name postgres -p 5432:5432 \
+            -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=balancequeue_test \
+            postgres:16 -c max_connections=250
+          for _ in $(seq 1 60); do
+            docker exec postgres pg_isready -h 127.0.0.1 -U postgres -d balancequeue_test && exit 0
+            sleep 1
+          done
+          docker logs postgres
+          exit 1
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Run tests
+        run: uv run pytest
+
+  docker:
+    name: Docker smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and start the stack
+        run: docker compose up --build --detach --wait
+
+      - name: Smoke test the matchmaking flow
+        run: bash scripts/smoke.sh http://127.0.0.1:8010
+
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Tear down
+        if: always()
+        run: docker compose down --volumes

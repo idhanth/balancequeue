@@ -218,7 +218,7 @@ def main() -> None:
             "against a single uvicorn worker on the same machine; random player per request",
             "without_index": before,
             "with_index": after,
-            "p95_reduction": round(p95_reduction, 4),
+            "p95_reduction": p95_reduction,
         },
     )
     print(f"wrote {path}")

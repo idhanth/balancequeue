@@ -2,6 +2,10 @@
 name = "balancequeue"
 version = "0.1.0"
 description = "Concurrency-safe 5v5 Elo matchmaking service (FastAPI + PostgreSQL)"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Idhanth Premkumar" }]
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.141.1",
@@ -10,6 +14,9 @@ dependencies = [
     "sqlalchemy>=2",
     "uvicorn[standard]>=0.52.4",
 ]
+
+[project.urls]
+Repository = "https://github.com/idhanth/balancequeue"
 
 [project.scripts]
 balancequeue = "balancequeue:main"
@@ -27,3 +34,8 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+filterwarnings = [
+    # Emitted by Starlette's TestClient about its own dependencies, not by this project.
+    "ignore:Using `httpx` with `starlette.testclient` is deprecated",
+    "ignore:The anyio.abc.BlockingPortal alias is deprecated",
+]

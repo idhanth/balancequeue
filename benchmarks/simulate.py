@@ -7,10 +7,9 @@ Writes benchmarks/results/simulation.json. Needs no database.
 """
 
 import argparse
-import platform
 import time
 
-from _bench import write_result
+from _bench import environment, write_result
 
 from balancequeue.simulation import run
 
@@ -42,7 +41,7 @@ def main() -> None:
         {
             "command": "uv run python benchmarks/simulate.py "
             + f"--games {args.games} --seed {args.seed} --elo-mean {args.elo_mean:g} --elo-sd {args.elo_sd:g}",
-            "python": platform.python_version(),
+            "environment": environment(),
             "elapsed_seconds": round(elapsed, 2),
             **result.to_dict(),
         },

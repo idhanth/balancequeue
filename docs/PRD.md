@@ -1038,11 +1038,11 @@ concurrent request volume
 
 ---
 
-# 23. Resume-Level Engineering Outcomes
+# 23. Engineering Outcomes
 
-Bullets supported by the measured results in [benchmarks.md](benchmarks.md):
+Outcomes supported by the measured results in [benchmarks.md](benchmarks.md):
 
-* **Reduced mean team Elo disparity 98.6% versus random assignment across 50,000 simulated 5v5 games by exhaustively evaluating all 126 unique team partitions (p99 balancing time 16 µs per lobby).**
+* **Reduced mean team Elo disparity 98.6% versus random assignment across 50,000 simulated 5v5 games by exhaustively evaluating all 126 unique team partitions (p99 balancing time 16.4 µs per lobby).**
 * **Achieved 0 duplicate player assignments across 2,000 matchmaking transactions (20 trials × 100 simultaneous) using PostgreSQL `FOR UPDATE SKIP LOCKED` and atomic match creation; the identical harness without row locks double-assigned players in 20 of 20 trials.**
 * **Cut player-history API p95 latency 97.9%, from 70.08 ms to 1.44 ms, on 5M match-history rows by replacing a parallel sequential scan with a composite `(player_id, created_at DESC, match_id DESC)` index, verified with `EXPLAIN ANALYZE`.**
 

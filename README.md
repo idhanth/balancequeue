@@ -1,5 +1,8 @@
 # BalanceQueue
 
+[![CI](https://github.com/idhanth/balancequeue/actions/workflows/ci.yml/badge.svg)](https://github.com/idhanth/balancequeue/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 BalanceQueue is a matchmaking backend for 5v5 games. It takes the 10 longest-waiting
 players and evaluates all 126 unique 5v5 splits of their Elo ratings. It then creates
 the most balanced match inside one PostgreSQL transaction. Concurrent requests can
@@ -10,13 +13,14 @@ Python 3.12 · FastAPI · SQLAlchemy 2 · PostgreSQL 16 · pytest. The specifica
 
 ## Results
 
-All figures come from reproducible scripts. The commands, method and raw JSON are in
+All figures come from reproducible scripts, and the test suite checks them against the
+raw results. The commands, conditions, method and the commit each run measured are in
 [docs/benchmarks.md](docs/benchmarks.md).
 
 | What | Result |
 |------|--------|
 | Mean team Elo disparity vs. random assignment, 50,000 simulated games (Normal(1500, 300) ratings; [conditions](docs/benchmarks.md#conditions-behind-the-986-figure)) | **−98.6%** (755.4 → 10.8) |
-| Duplicate player assignments, 20 trials × 100 simultaneous transactions | **0** (without locks: 20 of 20 trials had duplicates) |
+| Duplicate player assignments across 2,000 transactions (20 trials × 100 simultaneous) | **0** (without row locks: duplicates in 20 of 20 trials) |
 | `GET /players/{id}/matches` p95, 5M history rows, before → after index | **70.08 ms → 1.44 ms** (−97.9%) |
 | Balancer time per lobby (p99) | **16.4 µs** |
 
@@ -24,7 +28,8 @@ All figures come from reproducible scripts. The commands, method and raw JSON ar
 
 **Option A: Docker.** `docker compose up --build` starts PostgreSQL 16 and the API on
 http://127.0.0.1:8010 (interactive docs at `/docs`). Migrations run on startup. The
-compose credentials are for local development only.
+compose credentials are for local development only. `scripts/smoke.sh` runs the full
+matchmaking flow against a fresh stack; CI runs it on every push.
 
 **Option B: local, no Docker.** Requires [uv](https://docs.astral.sh/uv/) and the
 PostgreSQL 16 server binaries (`initdb`, `pg_ctl`, `psql`). `scripts/env.sh` looks
@@ -32,12 +37,12 @@ for them in `$BQ_PG_BIN`, then on `PATH`, then in any micromamba env. One way to
 them without admin rights is `micromamba create -n balancequeue -c conda-forge postgresql=16`.
 
 ```bash
-git clone <repo-url> balancequeue && cd balancequeue
+git clone https://github.com/idhanth/balancequeue.git && cd balancequeue
 source scripts/env.sh                       # export BQ_PGPORT=5440 first if 5434 is taken
 ./scripts/services.sh start                 # initdb + PostgreSQL on 127.0.0.1:5434, creates dev and test DBs
 uv sync
 uv run python -m balancequeue.migrate       # apply migrations to the dev database
-uv run pytest                               # 43 tests (the suite migrates its own test database)
+uv run pytest                               # full suite; it migrates its own test database
 uv run balancequeue                         # API on http://127.0.0.1:8010
 ./scripts/services.sh stop                  # when done
 ```
@@ -141,7 +146,12 @@ The tests and the concurrency benchmark share these checks.
 
 ```
 src/balancequeue/     balance.py · services/ · api.py · migrations/*.sql · invariants.py · simulation.py
-benchmarks/           simulate.py · concurrency.py · history.py · results/*.json
-tests/                balance · simulation · api · transactions · concurrency
-scripts/              env.sh · services.sh (local Postgres without Docker)
+benchmarks/           simulate.py · concurrency.py · history.py · report.py · results/*.json
+tests/                balance · simulation · api · transactions · concurrency · docs
+scripts/              env.sh · services.sh (local Postgres without Docker) · smoke.sh
+.github/workflows/    ci.yml: tests against PostgreSQL 16, Docker smoke test
 ```
+
+## License
+
+[MIT](LICENSE)
