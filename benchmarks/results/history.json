@@ -1,19 +1,20 @@
 {
   "command": "uv run python benchmarks/history.py --players 50000 --matches 500000 --requests 500 --warmup 50 --seed 42",
   "environment": {
-    "recorded_at": "2026-09-14T02:23:31+00:00",
+    "recorded_at": "2026-09-14T02:56:17+00:00",
     "machine": "Apple M5",
     "cpu_count": "10",
     "os": "macOS-26.5.1-arm64-arm-64bit",
     "python": "3.12.13",
+    "git_commit": "b25d6ab2d70555069b2e53fb7e158284f2fa4782",
+    "git_dirty": false,
     "postgres": "16.15",
     "postgres_settings": {
       "shared_buffers": "128MB",
       "work_mem": "4MB",
       "max_parallel_workers_per_gather": "2",
       "max_connections": "250"
-    },
-    "git_commit": null
+    }
   },
   "dataset": {
     "players": 50000,
@@ -21,28 +22,28 @@
     "match_players_rows": 5000000,
     "match_players_total_size": "643 MB",
     "matches_per_player": 100.0,
-    "seed_seconds": 34.5
+    "seed_seconds": 41.0
   },
   "method": "sequential GET /players/{id}/matches?limit=20 from one keep-alive httpx client against a single uvicorn worker on the same machine; random player per request",
   "without_index": {
     "requests": 500,
     "warmup_requests": 50,
-    "p50_ms": 63.48,
-    "p95_ms": 70.08,
-    "p99_ms": 82.69,
-    "mean_ms": 64.42,
-    "max_ms": 110.89,
-    "explain_analyze": "Limit  (cost=69062.54..69064.87 rows=20 width=24) (actual time=64.928..66.032 rows=20 loops=1)\n  Buffers: shared hit=16016 read=26083\n  ->  Gather Merge  (cost=69062.54..69072.34 rows=84 width=24) (actual time=64.927..66.031 rows=20 loops=1)\n        Workers Planned: 2\n        Workers Launched: 2\n        Buffers: shared hit=16016 read=26083\n        ->  Sort  (cost=68062.52..68062.62 rows=42 width=24) (actual time=62.972..62.973 rows=17 loops=3)\n              Sort Key: match_players.created_at DESC, match_players.match_id DESC\n              Sort Method: quicksort  Memory: 27kB\n              Buffers: shared hit=16016 read=26083\n              Worker 0:  Sort Method: quicksort  Memory: 27kB\n              Worker 1:  Sort Method: quicksort  Memory: 26kB\n              ->  Nested Loop  (cost=0.42..68061.40 rows=42 width=24) (actual time=1.965..62.940 rows=33 loops=3)\n                    Buffers: shared hit=15986 read=26083\n                    ->  Parallel Seq Scan on match_players  (cost=0.00..67708.58 rows=42 width=22) (actual time=1.914..62.615 rows=33 loops=3)\n                          Filter: (player_id = 33517)\n                          Rows Removed by Filter: 1666633\n                          Buffers: shared hit=15770 read=25897\n                    ->  Index Scan using matches_pkey on matches  (cost=0.42..8.40 rows=1 width=10) (actual time=0.009..0.009 rows=1 loops=100)\n                          Index Cond: (id = match_players.match_id)\n                          Buffers: shared hit=216 read=186\nPlanning:\n  Buffers: shared hit=96 read=10\nPlanning Time: 0.419 ms\nExecution Time: 66.063 ms"
+    "p50_ms": 65.82,
+    "p95_ms": 75.71,
+    "p99_ms": 113.58,
+    "mean_ms": 68.02,
+    "max_ms": 278.99,
+    "explain_analyze": "Limit  (cost=69054.37..69056.71 rows=20 width=24) (actual time=62.280..63.341 rows=20 loops=1)\n  Buffers: shared hit=16019 read=26080\n  ->  Gather Merge  (cost=69054.37..69063.94 rows=82 width=24) (actual time=62.279..63.339 rows=20 loops=1)\n        Workers Planned: 2\n        Workers Launched: 2\n        Buffers: shared hit=16019 read=26080\n        ->  Sort  (cost=68054.35..68054.45 rows=41 width=24) (actual time=60.759..60.760 rows=16 loops=3)\n              Sort Key: match_players.created_at DESC, match_players.match_id DESC\n              Sort Method: top-N heapsort  Memory: 27kB\n              Buffers: shared hit=16019 read=26080\n              Worker 0:  Sort Method: quicksort  Memory: 26kB\n              Worker 1:  Sort Method: quicksort  Memory: 27kB\n              ->  Nested Loop  (cost=0.42..68053.26 rows=41 width=24) (actual time=1.494..60.736 rows=33 loops=3)\n                    Buffers: shared hit=15989 read=26080\n                    ->  Parallel Seq Scan on match_players  (cost=0.00..67708.88 rows=41 width=22) (actual time=1.461..60.416 rows=33 loops=3)\n                          Filter: (player_id = 33517)\n                          Rows Removed by Filter: 1666633\n                          Buffers: shared hit=15773 read=25894\n                    ->  Index Scan using matches_pkey on matches  (cost=0.42..8.40 rows=1 width=10) (actual time=0.009..0.009 rows=1 loops=100)\n                          Index Cond: (id = match_players.match_id)\n                          Buffers: shared hit=216 read=186\nPlanning:\n  Buffers: shared hit=85 read=7\nPlanning Time: 0.829 ms\nExecution Time: 63.374 ms"
   },
   "with_index": {
     "requests": 500,
     "warmup_requests": 50,
-    "p50_ms": 1.22,
-    "p95_ms": 1.44,
-    "p99_ms": 1.67,
-    "mean_ms": 1.25,
-    "max_ms": 2.1,
-    "explain_analyze": "Limit  (cost=0.85..249.92 rows=20 width=24) (actual time=0.041..0.120 rows=20 loops=1)\n  Buffers: shared hit=111 read=1\n  ->  Nested Loop  (cost=0.85..1271.10 rows=102 width=24) (actual time=0.040..0.118 rows=20 loops=1)\n        Buffers: shared hit=111 read=1\n        ->  Index Scan using idx_player_history on match_players  (cost=0.43..414.22 rows=102 width=22) (actual time=0.034..0.051 rows=20 loops=1)\n              Index Cond: (player_id = 33517)\n              Buffers: shared hit=31 read=1\n        ->  Index Scan using matches_pkey on matches  (cost=0.42..8.40 rows=1 width=10) (actual time=0.003..0.003 rows=1 loops=20)\n              Index Cond: (id = match_players.match_id)\n              Buffers: shared hit=80\nPlanning:\n  Buffers: shared hit=109\nPlanning Time: 0.333 ms\nExecution Time: 0.131 ms"
+    "p50_ms": 1.15,
+    "p95_ms": 1.34,
+    "p99_ms": 1.46,
+    "mean_ms": 1.19,
+    "max_ms": 1.55,
+    "explain_analyze": "Limit  (cost=0.85..249.92 rows=20 width=24) (actual time=0.035..0.130 rows=20 loops=1)\n  Buffers: shared hit=111 read=1\n  ->  Nested Loop  (cost=0.85..1246.18 rows=100 width=24) (actual time=0.034..0.128 rows=20 loops=1)\n        Buffers: shared hit=111 read=1\n        ->  Index Scan using idx_player_history on match_players  (cost=0.43..406.18 rows=100 width=22) (actual time=0.028..0.050 rows=20 loops=1)\n              Index Cond: (player_id = 33517)\n              Buffers: shared hit=31 read=1\n        ->  Index Scan using matches_pkey on matches  (cost=0.42..8.40 rows=1 width=10) (actual time=0.004..0.004 rows=1 loops=20)\n              Index Cond: (id = match_players.match_id)\n              Buffers: shared hit=80\nPlanning:\n  Buffers: shared hit=113\nPlanning Time: 0.360 ms\nExecution Time: 0.140 ms"
   },
-  "p95_reduction": 0.9795
+  "p95_reduction": 0.9823008849557522
 }

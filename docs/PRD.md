@@ -108,14 +108,14 @@ Target:
 Measured ([benchmarks.md](benchmarks.md) §3), 5,000,000 `match_players` rows:
 
 ```text
-Without history index: p95 70.08 ms
-With history index:    p95 1.44 ms
+Without history index: p95 75.71 ms
+With history index:    p95 1.34 ms
 ```
 
 Improvement:
 
 ```text
-97.9%
+98.2%
 ```
 
 ---
@@ -559,7 +559,7 @@ may require scanning a large number of database rows.
 Measured without the history index (5,000,000 `match_players` rows):
 
 ```text
-p95 = 70.08 ms
+p95 = 75.71 ms
 ```
 
 ---
@@ -598,13 +598,13 @@ Measured after index optimization:
 ```text
 p95 latency:
 
-70.08 ms → 1.44 ms
+75.71 ms → 1.34 ms
 ```
 
 Improvement:
 
 ```text
-97.9%
+98.2%
 ```
 
 ---
@@ -1042,8 +1042,8 @@ concurrent request volume
 
 Outcomes supported by the measured results in [benchmarks.md](benchmarks.md):
 
-* **Reduced mean team Elo disparity 98.6% versus random assignment across 50,000 simulated 5v5 games by exhaustively evaluating all 126 unique team partitions (p99 balancing time 16.4 µs per lobby).**
+* **Reduced mean team Elo disparity 98.6% versus random assignment across 50,000 simulated 5v5 games by exhaustively evaluating all 126 unique team partitions (p99 balancing time 30.4 µs per lobby).**
 * **Achieved 0 duplicate player assignments across 2,000 matchmaking transactions (20 trials × 100 simultaneous) using PostgreSQL `FOR UPDATE SKIP LOCKED` and atomic match creation; the identical harness without row locks double-assigned players in 20 of 20 trials.**
-* **Cut player-history API p95 latency 97.9%, from 70.08 ms to 1.44 ms, on 5M match-history rows by replacing a parallel sequential scan with a composite `(player_id, created_at DESC, match_id DESC)` index, verified with `EXPLAIN ANALYZE`.**
+* **Cut player-history API p95 latency 98.2%, from 75.71 ms to 1.34 ms, on 5M match-history rows by replacing a parallel sequential scan with a composite `(player_id, created_at DESC, match_id DESC)` index, verified with `EXPLAIN ANALYZE`.**
 
 The important requirement is that each figure must come from an actual reproducible benchmark or test in the repository.

@@ -43,10 +43,12 @@ status=$(curl -s -o /dev/null -w '%{http_code}' -X POST "$BASE/matches")
 echo "second match with an empty queue: 409 INSUFFICIENT_PLAYERS"
 
 curl -fsS -X POST "$BASE/matches/$match_id/result" -H "$JSON" -d '{"winner_team":"A"}' >/dev/null
-curl -fsS "$BASE/players/${ids[0]}/matches" | python3 -c '
+history=$(curl -fsS "$BASE/players/${ids[0]}/matches")
+python3 - "$history" <<'PY'
 import json, sys
-[entry] = json.load(sys.stdin)["matches"]
+[entry] = json.loads(sys.argv[1])["matches"]
 assert entry["winner"] == (entry["team"] == "A"), entry
-print(f"history: match {entry[\"match_id\"]}, team {entry[\"team\"]}, winner={entry[\"winner\"]}")
-'
+match_id, team, winner = entry["match_id"], entry["team"], entry["winner"]
+print(f"history: match {match_id}, team {team}, winner={winner}")
+PY
 echo "smoke test passed"

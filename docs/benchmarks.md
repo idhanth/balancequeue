@@ -16,9 +16,9 @@ repository.
 
 | Benchmark | Commit measured | Clean tree | Recorded (UTC) | Machine | Software |
 |---|---|---|---|---|---|
-| Team balance | not recorded | not recorded | ? | ? (? cores), ? | Python 3.12.13 |
-| Concurrency | not recorded | not recorded | 2026-09-14T02:21:47+00:00 | Apple M5 (10 cores), macOS-26.5.1-arm64-arm-64bit | Python 3.12.13, PostgreSQL 16.15 |
-| Player history | not recorded | not recorded | 2026-09-14T02:23:31+00:00 | Apple M5 (10 cores), macOS-26.5.1-arm64-arm-64bit | Python 3.12.13, PostgreSQL 16.15 |
+| Team balance | `b25d6ab2d705` | yes | 2026-09-14T02:47:02+00:00 | Apple M5 (10 cores), macOS-26.5.1-arm64-arm-64bit | Python 3.12.13 |
+| Concurrency | `b25d6ab2d705` | yes | 2026-09-14T02:47:14+00:00 | Apple M5 (10 cores), macOS-26.5.1-arm64-arm-64bit | Python 3.12.13, PostgreSQL 16.15 |
+| Player history | `b25d6ab2d705` | yes | 2026-09-14T02:56:17+00:00 | Apple M5 (10 cores), macOS-26.5.1-arm64-arm-64bit | Python 3.12.13, PostgreSQL 16.15 |
 
 "Clean tree" means the working tree matched the commit, apart from the results files
 the scripts write. The client, API and database ran on the same machine. PostgreSQL
@@ -39,7 +39,7 @@ uv run python benchmarks/simulate.py --games 50000 --seed 42 --elo-mean 1500 --e
 | Optimized  | 10.8 | 7.0 | 33 | 598 |
 
 - **Mean disparity reduction: 98.6%** (median: 98.9%). The PRD target is at least 50%.
-- `balance()` time per lobby: p50 10.4 µs, p99 16.4 µs. The PRD target is under 100 ms.
+- `balance()` time per lobby: p50 10.7 µs, p99 30.4 µs. The PRD target is under 100 ms.
 - The optimized maximum (598) comes from lobbies with extreme rating outliers,
   where no 5v5 split can be close.
 
@@ -89,19 +89,19 @@ per strategy.
 
 | Strategy | Matches created | Players double-assigned | Excess assignments | Median trial wall time | Median request p95 |
 |---|--:|--:|--:|--:|--:|
-| `FOR UPDATE SKIP LOCKED` (shipped) | 2,000 / 2,000 | **0** | 0 | 131 ms | 119 ms |
-| `FOR UPDATE` | 2,000 / 2,000 | 0 | 0 | 153 ms | 129 ms |
-| no lock (control) | 2,000 / 2,000 | 200 (in 20 of 20 trials) | 19,800 | 180 ms | 165 ms |
+| `FOR UPDATE SKIP LOCKED` (shipped) | 2,000 / 2,000 | **0** | 0 | 136 ms | 121 ms |
+| `FOR UPDATE` | 2,000 / 2,000 | 0 | 0 | 170 ms | 146 ms |
+| no lock (control) | 2,000 / 2,000 | 210 (in 20 of 20 trials) | 19,790 | 196 ms | 179 ms |
 
 - **The shipped strategy: 0 duplicate assignments across 2,000 simultaneous transactions.**
   Malformed matches (not exactly 5v5): 0. Players whose status
   disagreed with the rosters: 0.
 - **Why the no-lock control is kept:** it proves the test really creates races. Without
-  row locks, 200 players were double-assigned, with 19,800 excess assignments,
-  in 20 of 20 trials. In every trial, all 100 requests read the same 10 players and built 100 matches from them.
+  row locks, 210 players were double-assigned, with 19,790 excess assignments,
+  in 20 of 20 trials.
 - Plain `FOR UPDATE` was also correct in this setup (0 duplicates),
   where players are plentiful. Median batch wall time was
-  153 ms, vs. 131 ms for `SKIP LOCKED`.
+  170 ms, vs. 136 ms for `SKIP LOCKED`.
 
 `tests/test_concurrency.py` repeats these checks on every CI run:
 
@@ -136,44 +136,44 @@ The first phase uses migration 001 only. The second applies
 
 | Schema | p50 | p95 | p99 | Mean | Max |
 |---|--:|--:|--:|--:|--:|
-| Without history index | 63.48 ms | 70.08 ms | 82.69 ms | 64.42 ms | 110.89 ms |
-| With history index | 1.22 ms | 1.44 ms | 1.67 ms | 1.25 ms | 2.10 ms |
+| Without history index | 65.82 ms | 75.71 ms | 113.58 ms | 68.02 ms | 278.99 ms |
+| With history index | 1.15 ms | 1.34 ms | 1.46 ms | 1.19 ms | 1.55 ms |
 
-- **p95: 70.08 ms → 1.44 ms, a 97.9% reduction.** Without the index the endpoint misses the PRD target at this dataset size; with it, the target is met.
+- **p95: 75.71 ms → 1.34 ms, a 98.2% reduction.** Without the index the endpoint misses the PRD target at this dataset size; with it, the target is met.
 - `EXPLAIN (ANALYZE, BUFFERS)` of the endpoint's exact query:
-  - Without the index, a parallel sequential scan reads all of `match_players`, discarding 1,666,633 rows per process; execution time 66.063 ms.
-  - With the index, an index scan on `idx_player_history` returns the newest rows already in order; execution time 0.131 ms.
+  - Without the index, a parallel sequential scan reads all of `match_players`, discarding 1,666,633 rows per process; execution time 63.374 ms.
+  - With the index, an index scan on `idx_player_history` returns the newest rows already in order; execution time 0.140 ms.
 - The no-index latency depends on table size, and this page does not measure how it
   scales. Pass `--matches` to try other sizes.
 
 <details><summary>Query plan without the index</summary>
 
 ```
-Limit  (cost=69062.54..69064.87 rows=20 width=24) (actual time=64.928..66.032 rows=20 loops=1)
-  Buffers: shared hit=16016 read=26083
-  ->  Gather Merge  (cost=69062.54..69072.34 rows=84 width=24) (actual time=64.927..66.031 rows=20 loops=1)
+Limit  (cost=69054.37..69056.71 rows=20 width=24) (actual time=62.280..63.341 rows=20 loops=1)
+  Buffers: shared hit=16019 read=26080
+  ->  Gather Merge  (cost=69054.37..69063.94 rows=82 width=24) (actual time=62.279..63.339 rows=20 loops=1)
         Workers Planned: 2
         Workers Launched: 2
-        Buffers: shared hit=16016 read=26083
-        ->  Sort  (cost=68062.52..68062.62 rows=42 width=24) (actual time=62.972..62.973 rows=17 loops=3)
+        Buffers: shared hit=16019 read=26080
+        ->  Sort  (cost=68054.35..68054.45 rows=41 width=24) (actual time=60.759..60.760 rows=16 loops=3)
               Sort Key: match_players.created_at DESC, match_players.match_id DESC
-              Sort Method: quicksort  Memory: 27kB
-              Buffers: shared hit=16016 read=26083
-              Worker 0:  Sort Method: quicksort  Memory: 27kB
-              Worker 1:  Sort Method: quicksort  Memory: 26kB
-              ->  Nested Loop  (cost=0.42..68061.40 rows=42 width=24) (actual time=1.965..62.940 rows=33 loops=3)
-                    Buffers: shared hit=15986 read=26083
-                    ->  Parallel Seq Scan on match_players  (cost=0.00..67708.58 rows=42 width=22) (actual time=1.914..62.615 rows=33 loops=3)
+              Sort Method: top-N heapsort  Memory: 27kB
+              Buffers: shared hit=16019 read=26080
+              Worker 0:  Sort Method: quicksort  Memory: 26kB
+              Worker 1:  Sort Method: quicksort  Memory: 27kB
+              ->  Nested Loop  (cost=0.42..68053.26 rows=41 width=24) (actual time=1.494..60.736 rows=33 loops=3)
+                    Buffers: shared hit=15989 read=26080
+                    ->  Parallel Seq Scan on match_players  (cost=0.00..67708.88 rows=41 width=22) (actual time=1.461..60.416 rows=33 loops=3)
                           Filter: (player_id = 33517)
                           Rows Removed by Filter: 1666633
-                          Buffers: shared hit=15770 read=25897
+                          Buffers: shared hit=15773 read=25894
                     ->  Index Scan using matches_pkey on matches  (cost=0.42..8.40 rows=1 width=10) (actual time=0.009..0.009 rows=1 loops=100)
                           Index Cond: (id = match_players.match_id)
                           Buffers: shared hit=216 read=186
 Planning:
-  Buffers: shared hit=96 read=10
-Planning Time: 0.419 ms
-Execution Time: 66.063 ms
+  Buffers: shared hit=85 read=7
+Planning Time: 0.829 ms
+Execution Time: 63.374 ms
 ```
 
 </details>
@@ -181,20 +181,20 @@ Execution Time: 66.063 ms
 <details><summary>Query plan with the index</summary>
 
 ```
-Limit  (cost=0.85..249.92 rows=20 width=24) (actual time=0.041..0.120 rows=20 loops=1)
+Limit  (cost=0.85..249.92 rows=20 width=24) (actual time=0.035..0.130 rows=20 loops=1)
   Buffers: shared hit=111 read=1
-  ->  Nested Loop  (cost=0.85..1271.10 rows=102 width=24) (actual time=0.040..0.118 rows=20 loops=1)
+  ->  Nested Loop  (cost=0.85..1246.18 rows=100 width=24) (actual time=0.034..0.128 rows=20 loops=1)
         Buffers: shared hit=111 read=1
-        ->  Index Scan using idx_player_history on match_players  (cost=0.43..414.22 rows=102 width=22) (actual time=0.034..0.051 rows=20 loops=1)
+        ->  Index Scan using idx_player_history on match_players  (cost=0.43..406.18 rows=100 width=22) (actual time=0.028..0.050 rows=20 loops=1)
               Index Cond: (player_id = 33517)
               Buffers: shared hit=31 read=1
-        ->  Index Scan using matches_pkey on matches  (cost=0.42..8.40 rows=1 width=10) (actual time=0.003..0.003 rows=1 loops=20)
+        ->  Index Scan using matches_pkey on matches  (cost=0.42..8.40 rows=1 width=10) (actual time=0.004..0.004 rows=1 loops=20)
               Index Cond: (id = match_players.match_id)
               Buffers: shared hit=80
 Planning:
-  Buffers: shared hit=109
-Planning Time: 0.333 ms
-Execution Time: 0.131 ms
+  Buffers: shared hit=113
+Planning Time: 0.360 ms
+Execution Time: 0.140 ms
 ```
 
 </details>
@@ -205,10 +205,10 @@ Execution Time: 0.131 ms
 
 - Reduced mean team Elo disparity **98.6%** vs. random assignment across **50,000**
   simulated games (normal(mean=1500), by exhaustively evaluating all **126** unique
-  5v5 partitions (p99 balancing time 16.4 µs).
+  5v5 partitions (p99 balancing time 30.4 µs).
 - **0 duplicate player assignments** across **2,000** matchmaking transactions
   (20 trials × 100 simultaneous) using PostgreSQL `FOR UPDATE SKIP LOCKED`. The
   same test without row locks double-assigned players in 20 of 20 trials.
-- Cut player-history p95 latency from **70.08 ms to 1.44 ms (−97.9%)** on
+- Cut player-history p95 latency from **75.71 ms to 1.34 ms (−98.2%)** on
   **5,000,000** `match_players` rows with a composite
   `(player_id, created_at DESC, match_id DESC)` index, verified with `EXPLAIN ANALYZE`.

@@ -11,18 +11,19 @@ never assign the same player twice.
 Python 3.12 · FastAPI · SQLAlchemy 2 · PostgreSQL 16 · pytest. The specification is in
 [docs/PRD.md](docs/PRD.md).
 
-## Results
+## Measured results
 
-All figures come from reproducible scripts, and the test suite checks them against the
-raw results. The commands, conditions, method and the commit each run measured are in
-[docs/benchmarks.md](docs/benchmarks.md).
+Every figure below was measured by the scripts in `benchmarks/`, and the test suite checks
+each one against the raw results. Targets come from the PRD. The example later in this
+README illustrates the API; it is not a benchmark. Commands, conditions, methodology and
+the commit each run measured are in [docs/benchmarks.md](docs/benchmarks.md).
 
-| What | Result |
-|------|--------|
-| Mean team Elo disparity vs. random assignment, 50,000 simulated games (Normal(1500, 300) ratings; [conditions](docs/benchmarks.md#conditions-behind-the-986-figure)) | **−98.6%** (755.4 → 10.8) |
-| Duplicate player assignments across 2,000 transactions (20 trials × 100 simultaneous) | **0** (without row locks: duplicates in 20 of 20 trials) |
-| `GET /players/{id}/matches` p95, 5M history rows, before → after index | **70.08 ms → 1.44 ms** (−97.9%) |
-| Balancer time per lobby (p99) | **16.4 µs** |
+| What | PRD target | Measured |
+|------|-----------|----------|
+| Mean team Elo disparity vs. one random 5v5 split, 50,000 simulated games (Normal(1500, 300) ratings; [conditions](docs/benchmarks.md#conditions-behind-the-986-figure)) | at least 50% lower | **−98.6%** (755.4 → 10.8) |
+| Duplicate player assignments across 2,000 simultaneous matchmaking transactions (20 trials × 100) | 0 | **0** (control without row locks: duplicates in 20 of 20 trials) |
+| `GET /players/{id}/matches` p95 latency, 5M history rows, without → with index | under 50 ms | **75.71 ms → 1.34 ms** (−98.2%) |
+| Balancer time per lobby (p99) | under 100 ms | **30.4 µs** |
 
 ## Quick start
 

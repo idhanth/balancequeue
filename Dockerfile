@@ -10,6 +10,8 @@ ENV UV_COMPILE_BYTECODE=1 \
 COPY pyproject.toml uv.lock .python-version ./
 RUN uv sync --locked --no-dev --no-install-project
 
+# README.md and LICENSE are package metadata (pyproject readme / license-files).
+COPY README.md LICENSE ./
 COPY src ./src
 RUN uv sync --locked --no-dev
 

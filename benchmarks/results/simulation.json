@@ -1,7 +1,15 @@
 {
   "command": "uv run python benchmarks/simulate.py --games 50000 --seed 42 --elo-mean 1500 --elo-sd 300",
-  "python": "3.12.13",
-  "elapsed_seconds": 0.88,
+  "environment": {
+    "recorded_at": "2026-09-14T02:47:02+00:00",
+    "machine": "Apple M5",
+    "cpu_count": "10",
+    "os": "macOS-26.5.1-arm64-arm-64bit",
+    "python": "3.12.13",
+    "git_commit": "b25d6ab2d70555069b2e53fb7e158284f2fa4782",
+    "git_dirty": false
+  },
+  "elapsed_seconds": 1.01,
   "games": 50000,
   "seed": 42,
   "elo_distribution": "normal(mean=1500, sd=300), rounded, floored at 0",
@@ -19,7 +27,7 @@
   },
   "mean_reduction": 0.985706052117345,
   "median_reduction": 0.988976377952756,
-  "balance_call_p50_us": 10.375,
-  "balance_call_p99_us": 16.375,
-  "balance_call_max_us": 346.875
+  "balance_call_p50_us": 10.708,
+  "balance_call_p99_us": 30.375,
+  "balance_call_max_us": 11574.167
 }
