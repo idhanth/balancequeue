@@ -1,0 +1,29 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local runtime state: PostgreSQL data directory, logs, sockets (scripts/services.sh)
+.localdev/
+*.log
+*.pid
+
+# Environment files and secrets
+.env
+.env.*
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/
+
+# benchmarks/results/*.json is committed on purpose: it is the raw evidence behind
+# docs/benchmarks.md. Regenerate it with the commands listed there; do not hand-edit.

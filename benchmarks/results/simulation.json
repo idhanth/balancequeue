@@ -1,0 +1,25 @@
+{
+  "command": "uv run python benchmarks/simulate.py --games 50000 --seed 42 --elo-mean 1500 --elo-sd 300",
+  "python": "3.12.13",
+  "elapsed_seconds": 0.88,
+  "games": 50000,
+  "seed": 42,
+  "elo_distribution": "normal(mean=1500, sd=300), rounded, floored at 0",
+  "random_assignment": {
+    "mean": 755.4414,
+    "median": 635.0,
+    "p95": 1857,
+    "max": 4243
+  },
+  "optimized_assignment": {
+    "mean": 10.79824,
+    "median": 7.0,
+    "p95": 33,
+    "max": 598
+  },
+  "mean_reduction": 0.985706052117345,
+  "median_reduction": 0.988976377952756,
+  "balance_call_p50_us": 10.375,
+  "balance_call_p99_us": 16.375,
+  "balance_call_max_us": 346.875
+}

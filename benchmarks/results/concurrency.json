@@ -1,0 +1,915 @@
+{
+  "command": "uv run python benchmarks/concurrency.py --trials 20 --seed 42",
+  "environment": {
+    "recorded_at": "2026-09-14T02:21:47+00:00",
+    "machine": "Apple M5",
+    "cpu_count": "10",
+    "os": "macOS-26.5.1-arm64-arm-64bit",
+    "python": "3.12.13",
+    "postgres": "16.15",
+    "postgres_settings": {
+      "shared_buffers": "128MB",
+      "work_mem": "4MB",
+      "max_parallel_workers_per_gather": "2",
+      "max_connections": "250"
+    },
+    "git_commit": null
+  },
+  "setup": {
+    "concurrent_requests": 100,
+    "queued_players_per_trial": 1000
+  },
+  "modes": {
+    "skip_locked": {
+      "summary": {
+        "trials": 20,
+        "requests": 2000,
+        "outcomes": {
+          "created": 2000
+        },
+        "trials_with_duplicates": 0,
+        "duplicate_players_total": 0,
+        "excess_assignments_total": 0,
+        "malformed_matches_total": 0,
+        "median_wall_ms": 131.39506243169308,
+        "median_request_p95_ms": 119.35427103890106
+      },
+      "trials": [
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 216.96545800659806,
+          "request_p50_ms": 123.73312492854893,
+          "request_p95_ms": 136.84287492651492
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 131.35695806704462,
+          "request_p50_ms": 111.38037499040365,
+          "request_p95_ms": 119.21958299353719
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 140.99320804234594,
+          "request_p50_ms": 123.33858304191381,
+          "request_p95_ms": 129.93287504650652
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 131.93016697186977,
+          "request_p50_ms": 113.15491597633809,
+          "request_p95_ms": 120.19991595298052
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 131.35883293580264,
+          "request_p50_ms": 113.86875004973263,
+          "request_p95_ms": 119.48895908426493
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 145.84366604685783,
+          "request_p50_ms": 128.96875001024455,
+          "request_p95_ms": 134.85466688871384
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 137.8410420147702,
+          "request_p50_ms": 114.83095900621265,
+          "request_p95_ms": 125.95062493346632
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 130.05145802162588,
+          "request_p50_ms": 111.40275001525879,
+          "request_p95_ms": 119.05587499495596
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 127.21212499309331,
+          "request_p50_ms": 107.72629210259765,
+          "request_p95_ms": 115.99308298900723
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 136.7591250455007,
+          "request_p50_ms": 117.2868749126792,
+          "request_p95_ms": 125.70649990811944
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 128.053207998164,
+          "request_p50_ms": 110.62483303248882,
+          "request_p95_ms": 116.64799996651709
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 129.21670789364725,
+          "request_p50_ms": 110.26962497271597,
+          "request_p95_ms": 117.17524996493012
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 131.43745809793472,
+          "request_p50_ms": 113.35804197005928,
+          "request_p95_ms": 119.74370805546641
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 134.68995806761086,
+          "request_p50_ms": 115.82633398938924,
+          "request_p95_ms": 123.7394999479875
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 130.42391708586365,
+          "request_p50_ms": 111.86887498479337,
+          "request_p95_ms": 118.99270804133266
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 130.15462504699826,
+          "request_p50_ms": 111.57445795834064,
+          "request_p95_ms": 119.18112507555634
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 129.094791947864,
+          "request_p50_ms": 111.39125004410744,
+          "request_p95_ms": 116.78920802660286
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 136.12233300227672,
+          "request_p50_ms": 111.37699999380857,
+          "request_p95_ms": 118.75166604295373
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 128.935250104405,
+          "request_p50_ms": 109.8912499146536,
+          "request_p95_ms": 118.06174996308982
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 131.43129192758352,
+          "request_p50_ms": 112.39979101810604,
+          "request_p95_ms": 120.40479201823473
+        }
+      ]
+    },
+    "for_update": {
+      "summary": {
+        "trials": 20,
+        "requests": 2000,
+        "outcomes": {
+          "created": 2000
+        },
+        "trials_with_duplicates": 0,
+        "duplicate_players_total": 0,
+        "excess_assignments_total": 0,
+        "malformed_matches_total": 0,
+        "median_wall_ms": 153.13252055784687,
+        "median_request_p95_ms": 128.7748334580101
+      },
+      "trials": [
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 154.77079106494784,
+          "request_p50_ms": 68.46995803061873,
+          "request_p95_ms": 131.33420795202255
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 152.8069160412997,
+          "request_p50_ms": 64.22058294992894,
+          "request_p95_ms": 129.09266690257937
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 166.3602499756962,
+          "request_p50_ms": 84.26508295815438,
+          "request_p95_ms": 146.6257079737261
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 147.30087504722178,
+          "request_p50_ms": 64.31287492159754,
+          "request_p95_ms": 127.14512494858354
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 153.587874956429,
+          "request_p50_ms": 65.72625006083399,
+          "request_p95_ms": 126.13562494516373
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 164.51766609679908,
+          "request_p50_ms": 68.89445905108005,
+          "request_p95_ms": 131.13804103340954
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 155.27325007133186,
+          "request_p50_ms": 69.04883403331041,
+          "request_p95_ms": 129.21237491536885
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 146.96083404123783,
+          "request_p50_ms": 64.10216609947383,
+          "request_p95_ms": 126.01416604593396
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 156.07024997007102,
+          "request_p50_ms": 72.15625001117587,
+          "request_p95_ms": 136.58104208298028
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 147.24566705990583,
+          "request_p50_ms": 64.77308308240026,
+          "request_p95_ms": 124.27033297717571
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 158.88150001410395,
+          "request_p50_ms": 72.92979198973626,
+          "request_p95_ms": 132.17662496026605
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 149.5862080482766,
+          "request_p50_ms": 64.17637504637241,
+          "request_p95_ms": 129.30537504144013
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 153.45812507439405,
+          "request_p50_ms": 68.0255419574678,
+          "request_p95_ms": 126.72108307015151
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 146.85895899310708,
+          "request_p50_ms": 62.354583060368896,
+          "request_p95_ms": 124.26199996843934
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 155.1770840305835,
+          "request_p50_ms": 61.61604099906981,
+          "request_p95_ms": 134.25366708543152
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 148.77708395943046,
+          "request_p50_ms": 65.58395794127136,
+          "request_p95_ms": 126.20575004257262
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 146.9967500306666,
+          "request_p50_ms": 64.33866592124104,
+          "request_p95_ms": 124.29354200139642
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 147.6127909263596,
+          "request_p50_ms": 63.14941693563014,
+          "request_p95_ms": 127.25458398927003
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 174.48945809155703,
+          "request_p50_ms": 62.96887493226677,
+          "request_p95_ms": 144.65854107402265
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 1000,
+          "duplicate_players": 0,
+          "excess_assignments": 0,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 148.2107499614358,
+          "request_p50_ms": 64.58454101812094,
+          "request_p95_ms": 128.45700001344085
+        }
+      ]
+    },
+    "none": {
+      "summary": {
+        "trials": 20,
+        "requests": 2000,
+        "outcomes": {
+          "created": 2000
+        },
+        "trials_with_duplicates": 20,
+        "duplicate_players_total": 200,
+        "excess_assignments_total": 19800,
+        "malformed_matches_total": 0,
+        "median_wall_ms": 180.42604153743014,
+        "median_request_p95_ms": 165.22114648250863
+      },
+      "trials": [
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 179.02620800305158,
+          "request_p50_ms": 141.41849998850375,
+          "request_p95_ms": 165.15770903788507
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 179.4351659482345,
+          "request_p50_ms": 141.4617080008611,
+          "request_p95_ms": 164.3498750636354
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 191.17420900147408,
+          "request_p50_ms": 150.90091596357524,
+          "request_p95_ms": 177.89808299858123
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 181.86424998566508,
+          "request_p50_ms": 142.43445894680917,
+          "request_p95_ms": 168.25975000392646
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 176.1048750486225,
+          "request_p50_ms": 136.14291592966765,
+          "request_p95_ms": 161.71466698870063
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 179.21229195781052,
+          "request_p50_ms": 140.3584579238668,
+          "request_p95_ms": 165.2845839271322
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 184.5074580051005,
+          "request_p50_ms": 139.50241694692522,
+          "request_p95_ms": 163.05674996692687
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 180.9156669769436,
+          "request_p50_ms": 138.5010409867391,
+          "request_p95_ms": 168.51962497457862
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 176.30158306565136,
+          "request_p50_ms": 135.546833043918,
+          "request_p95_ms": 162.2225830797106
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 191.54229201376438,
+          "request_p50_ms": 151.296625030227,
+          "request_p95_ms": 174.98766700737178
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 180.21000002045184,
+          "request_p50_ms": 140.67866699770093,
+          "request_p95_ms": 164.91479193791747
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 177.0574999973178,
+          "request_p50_ms": 138.56216589920223,
+          "request_p95_ms": 162.4994999729097
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 183.48483403678983,
+          "request_p50_ms": 144.66591703239828,
+          "request_p95_ms": 169.29958306718618
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 183.37908294051886,
+          "request_p50_ms": 136.30033296067268,
+          "request_p95_ms": 161.91454196814448
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 180.64208305440843,
+          "request_p50_ms": 140.98133402876556,
+          "request_p95_ms": 167.01995802577585
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 176.78854207042605,
+          "request_p50_ms": 138.2902500918135,
+          "request_p95_ms": 162.4148749979213
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 188.15095792524517,
+          "request_p50_ms": 150.28504095971584,
+          "request_p95_ms": 174.79412490502
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 179.50691597070545,
+          "request_p50_ms": 139.51670902315527,
+          "request_p95_ms": 164.64041697327048
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 179.8961659660563,
+          "request_p50_ms": 137.8046249737963,
+          "request_p95_ms": 165.54624994751066
+        },
+        {
+          "outcomes": {
+            "created": 100
+          },
+          "assignments": 1000,
+          "distinct_players_assigned": 10,
+          "duplicate_players": 10,
+          "excess_assignments": 990,
+          "status_mismatches": 0,
+          "malformed_matches": 0,
+          "wall_ms": 188.45825002063066,
+          "request_p50_ms": 148.63933401647955,
+          "request_p95_ms": 173.04037499707192
+        }
+      ]
+    }
+  }
+}
